@@ -350,3 +350,10 @@ def _escape_shell_command(command):
     for n in ('`', '$', '"'):
         command = command.replace(n, '\%s' % n)
     return command
+
+
+class Hooks(models.Model):
+    command = models.CharField(_("shell command"), max_length=255,
+        help_text=_("A shell command."), blank=True)
+
+
