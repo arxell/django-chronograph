@@ -14,6 +14,8 @@ import shlex
 import subprocess
 import sys
 import traceback
+import requests
+import socket
 
 class JobManager(models.Manager):
     def due(self):
@@ -345,6 +347,7 @@ INFORMATIONAL OUTPUT
             recipient_list=subscribers,
             message=message_body
         )
+        requests.get('http://{}:8080/sync'.format(socket.gethostname()))
 
 def _escape_shell_command(command):
     for n in ('`', '$', '"'):
