@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
 from django.template import loader, Context
-from django.utils.encoding import smart_str
+from django.utils.encoding import smart_str, smart_unicode
 from django.utils.timesince import timeuntil
 from django.utils.timezone import now as tz_now
 from django.utils.translation import ungettext, ugettext, ugettext_lazy as _
@@ -14,8 +14,7 @@ import shlex
 import subprocess
 import sys
 import traceback
-import requests
-import socket
+
 
 class JobManager(models.Manager):
     def due(self):
@@ -32,6 +31,7 @@ freqs = (("YEARLY", _("Yearly")),
             ("HOURLY", _("Hourly")),
             ("MINUTELY", _("Minutely")),
             ("SECONDLY", _("Secondly")))
+
 
 class Job(models.Model):
     """
@@ -313,34 +313,29 @@ class Log(models.Model):
         for user in subscriber_set:
             subscribers.append('"%s" <%s>' % (user.get_full_name(), user.email))
 
-        message_body = """
+        message_body = u'''
 ********************************************************************************
-JOB NAME: %(job_name)s
-RUN DATE: %(run_date)s
-END DATE: %(end_date)s
-SUCCESSFUL: %(success)s
+JOB NAME: {}
+RUN DATE: {}
+END DATE: {}
+SUCCESSFUL: {}
 ********************************************************************************
-""" % {
-    'job_name': self.job.name,
-    'run_date': self.run_date,
-    'end_date': self.end_date,
-    'success': self.success,
-}
+'''.format(self.job.name, self.run_date, self.end_date, self.success)
 
         if not self.success:
-            message_body += """
+            message_body += u'''
 ********************************************************************************
 ERROR OUTPUT
 ********************************************************************************
-%(error_output)s
-""" % {'error_output': self.stderr}
+{}
+'''.format(self.stderr)
 
-        message_body += """
+        message_body += u'''
 ********************************************************************************
 INFORMATIONAL OUTPUT
 ********************************************************************************
-%(info_output)s
-""" % {'info_output': info_output}
+{}
+'''.format(smart_unicode(info_output))
 
         send_mail(
             from_email='"%s" <%s>' % (settings.EMAIL_SENDER, settings.EMAIL_HOST_USER),
@@ -348,7 +343,6 @@ INFORMATIONAL OUTPUT
             recipient_list=subscribers,
             message=message_body
         )
-        requests.get('http://{}:8080/sync'.format(socket.gethostname()))
 
 def _escape_shell_command(command):
     for n in ('`', '$', '"'):
@@ -359,5 +353,3 @@ def _escape_shell_command(command):
 class Hooks(models.Model):
     command = models.CharField(_("shell command"), max_length=255,
         help_text=_("A shell command."), blank=True)
-
-
