@@ -338,8 +338,8 @@ INFORMATIONAL OUTPUT
 '''.format(smart_unicode(info_output))
 
         send_mail(
-            from_email='"%s" <%s>' % (settings.EMAIL_SENDER, settings.EMAIL_HOST_USER),
-            subject='%s' % self,
+            from_email='{}'.format(settings.EMAIL_SENDER),
+            subject='{}'.format(self),
             recipient_list=subscribers,
             message=message_body
         )
