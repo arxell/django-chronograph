@@ -3,7 +3,7 @@ from distutils.core import setup
 from distutils.command.install import INSTALL_SCHEMES
 import os
 
-app_name = 'django-inoa-chronograph'
+app_name = 'django-chronograph'
 package_dir = 'chronograph'
 
 for scheme in INSTALL_SCHEMES.values():
