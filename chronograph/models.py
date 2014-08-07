@@ -16,6 +16,7 @@ import traceback
 
 
 class JobManager(models.Manager):
+
     def due(self):
         """
         Returns a ``QuerySet`` of all jobs waiting to be run.
@@ -24,33 +25,34 @@ class JobManager(models.Manager):
 
 # A lot of rrule stuff is from django-schedule
 freqs = (("YEARLY", _("Yearly")),
-            ("MONTHLY", _("Monthly")),
-            ("WEEKLY", _("Weekly")),
-            ("DAILY", _("Daily")),
-            ("HOURLY", _("Hourly")),
-            ("MINUTELY", _("Minutely")),
-            ("SECONDLY", _("Secondly")))
+         ("MONTHLY", _("Monthly")),
+         ("WEEKLY", _("Weekly")),
+         ("DAILY", _("Daily")),
+         ("HOURLY", _("Hourly")),
+         ("MINUTELY", _("Minutely")),
+         ("SECONDLY", _("Secondly")))
 
 
 class Job(models.Model):
+
     """
     A recurring ``django-admin`` command to be run.
     """
     name = models.CharField(_("name"), max_length=200)
     frequency = models.CharField(_("frequency"), choices=freqs, max_length=10)
     params = models.TextField(_("params"), null=True, blank=True,
-        help_text=_(
-            'Semicolon separated list (no spaces) of '
-            '<a href="http://labix.org/python-dateutil" target="_blank">rrule '
-            'parameters</a>. e.g: interval:15 or byhour:6;byminute:40'
-    ))
+                              help_text=_(
+                                  'Semicolon separated list (no spaces) of '
+                                  '<a href="http://labix.org/python-dateutil" target="_blank">rrule '
+                                  'parameters</a>. e.g: interval:15 or byhour:6;byminute:40'
+                              ))
     command = models.CharField(_("command"), max_length=200,
-        help_text=_("A valid django-admin command to run."), blank=True)
+                               help_text=_("A valid django-admin command to run."), blank=True)
     shell_command = models.CharField(_("shell command"), max_length=255,
-        help_text=_("A shell command."), blank=True)
+                                     help_text=_("A shell command."), blank=True)
     run_in_shell = models.BooleanField(default=False, help_text=_('This command needs to run within a shell?'))
     args = models.CharField(_("args"), max_length=200, blank=True,
-        help_text=_("Space separated list; e.g: arg1 option1=True"))
+                            help_text=_("Space separated list; e.g: arg1 option1=True"))
     disabled = models.BooleanField(_("disabled"), default=False, help_text=_('If checked this job will never run.'))
     next_run = models.DateTimeField(_("next run"), blank=True, null=True, help_text=_("If you don't set this it will be determined automatically"))
     adhoc_run = models.BooleanField(default=False)
@@ -256,8 +258,9 @@ class Job(models.Model):
 
 
 class Log(models.Model):
+
     """
-    A record of stdout and stderr of a ``Job``.
+        A record of stdout and stderr of a ``Job``.
     """
     job = models.ForeignKey(Job)
     run_date = models.DateTimeField()
@@ -322,6 +325,7 @@ INFORMATIONAL OUTPUT
             message=message_body
         )
 
+
 def _escape_shell_command(command):
     for n in ('`', '$', '"'):
         command = command.replace(n, '\%s' % n)
@@ -330,4 +334,4 @@ def _escape_shell_command(command):
 
 class Hooks(models.Model):
     command = models.CharField(_("shell command"), max_length=255,
-        help_text=_("A shell command."), blank=True)
+                               help_text=_("A shell command."), blank=True)
