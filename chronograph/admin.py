@@ -16,6 +16,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class HTMLWidget(forms.Widget):
+
     def __init__(self, rel=None, attrs=None):
         self.rel = rel
         super(HTMLWidget, self).__init__(attrs)
@@ -32,7 +33,9 @@ class HTMLWidget(forms.Widget):
         final_attrs = self.build_attrs(attrs, name=name)
         return mark_safe("<div%s>%s</div>" % (flatatt(final_attrs), linebreaks(value)))
 
+
 class JobForm(forms.ModelForm):
+
     class Meta:
         model = Job
         widgets = {
@@ -45,7 +48,7 @@ class JobForm(forms.ModelForm):
         if self.cleaned_data.get('command', '').strip() and \
                 self.cleaned_data.get('shell_command', '').strip():
             raise forms.ValidationError(_("Can't specify a shell_command if "
-                              "a django admin command is already specified"))
+                                          "a django admin command is already specified"))
         return self.cleaned_data['shell_command']
 
     def clean(self):
@@ -55,6 +58,7 @@ class JobForm(forms.ModelForm):
             raise forms.ValidationError(_("Must specify either command or "
                                         "shell command"))
         return cleaned_data
+
 
 class JobAdmin(admin.ModelAdmin):
     actions = ['disable_jobs', 'reset_jobs']
@@ -121,8 +125,6 @@ class JobAdmin(admin.ModelAdmin):
     next_run_.short_description = _('Next run')
     next_run_.admin_order_field = 'next_run'
 
-
-
     def job_success(self, obj):
         return obj.last_run_successful
     job_success.short_description = _(u'OK')
@@ -163,17 +165,19 @@ class JobAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super(JobAdmin, self).get_urls()
         my_urls = patterns('',
-            url(r'^(.+)/run/$', self.admin_site.admin_view(self.run_job_view), name="chronograph_job_run"),
-        )
+                           url(r'^(.+)/run/$', self.admin_site.admin_view(self.run_job_view), name="chronograph_job_run"),
+                           )
         return my_urls + urls
 
+
 class LogAdmin(admin.ModelAdmin):
-    list_display = ('job_name', 'run_date', 'end_date', 'job_duration', 'job_success', 'output', 'errors',)
-    search_fields = ('stdout', 'stderr', 'job__name', 'job__command')
+    list_display = ('job_name', 'run_date', 'hostname', 'end_date', 'job_duration', 'job_success', 'output', 'errors',)
+    search_fields = ('stdout', 'stderr', 'job__name', 'job__command',)
     date_hierarchy = 'run_date'
+    list_filter = ('job__name', 'hostname',)
     fieldsets = (
         (None, {
-            'fields': ('job',)
+            'fields': ('job', 'hostname')
         }),
         (_('Output'), {
             'fields': ('stdout', 'stderr',)
@@ -211,7 +215,7 @@ class LogAdmin(admin.ModelAdmin):
         return False
 
     def formfield_for_dbfield(self, db_field, **kwargs):
-        request = kwargs.pop("request", None)
+        kwargs.pop("request", None)
 
         if isinstance(db_field, models.TextField):
             kwargs['widget'] = HTMLWidget()

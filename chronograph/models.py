@@ -10,8 +10,8 @@ from django.utils.timesince import timeuntil
 from django.utils.timezone import now as tz_now
 from django.utils.translation import ungettext, ugettext, ugettext_lazy as _
 import shlex
+import socket
 import subprocess
-import sys
 import traceback
 
 
@@ -189,6 +189,7 @@ class Job(models.Model):
         # Create a log entry no matter what to see the last time the Job ran:
         log = Log.objects.create(
             job=self,
+            hostname=socket.gethostname(),
             run_date=run_date,
             end_date=end_date,
             stdout=stdout_str,
@@ -265,6 +266,7 @@ class Log(models.Model):
     job = models.ForeignKey(Job)
     run_date = models.DateTimeField()
     end_date = models.DateTimeField(null=True)
+    hostname = models.TextField(null=True)
     stdout = models.TextField(blank=True)
     stderr = models.TextField(blank=True)
     success = models.BooleanField(default=True, editable=False)
