@@ -12,3 +12,7 @@ dist
 /.pydevproject
 /MANIFEST
 /.settings
+
+# Sublime files
+*.sublime-project
+*.sublime-workspace

@@ -1,11 +1,10 @@
-from StringIO import StringIO
+from cStringIO import StringIO
 from dateutil import rrule
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
-from django.template import loader, Context
 from django.utils.encoding import smart_str, smart_unicode
 from django.utils.timesince import timeuntil
 from django.utils.timezone import now as tz_now
@@ -216,26 +215,18 @@ class Job(models.Model):
         stderr = StringIO()
 
         # Redirect output so that we can log it if there is any
-        ostdout = sys.stdout
-        ostderr = sys.stderr
-        sys.stdout = stdout
-        sys.stderr = stderr
+        options['stdout'] = stdout
+        options['stderr'] = stderr
         exception_str = ''
 
         try:
             call_command(self.command, *args, **options)
             success = True
-        except Exception, e:
-            exception_str = self._get_exception_string(e, sys.exc_info())
+        except Exception:
+            exception_str = traceback.print_exc()
             success = False
 
-        sys.stdout = ostdout
-        sys.stderr = ostderr
-
-        stdout_str = stdout.getvalue()
-        stderr_str = stderr.getvalue()
-
-        return stdout_str, stderr_str + exception_str, success
+        return stdout.getvalue(), stderr.getvalue() + exception_str, success
 
     def run_shell_command(self):
         """
@@ -257,24 +248,11 @@ class Job(models.Model):
             if proc.returncode:
                 stderr_str += "\n\n*** Process ended with return code %d\n\n" % proc.returncode
             success = not proc.returncode
-        except Exception, e:
-            stderr_str += self._get_exception_string(e, sys.exc_info())
+        except Exception:
+            stderr_str = traceback.print_exc()
             success = False
 
         return stdout_str, stderr_str, success
-
-    def _get_exception_string(self, e, exc_info):
-        try:
-            t = loader.get_template('chronograph/error_message.txt')
-            c = Context({
-                    'exception': unicode(e),
-                    'traceback': ['\n'.join(traceback.format_exception(*exc_info))]
-                    })
-            return t.render(c)
-        except:
-            return u"Unable to render traceback."
-
-
 
 
 class Log(models.Model):
@@ -296,7 +274,7 @@ class Log(models.Model):
 
     def get_duration(self):
         if self.end_date:
-            return self.end_date - self.run_date;
+            return self.end_date - self.run_date
         else:
             return None
 
