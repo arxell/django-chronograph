@@ -8,7 +8,7 @@ class Command(BaseCommand):
     help = 'Deletes old job logs.'
 
     def handle( self, *args, **options ):
-        if len( args ) != 2:
+        if len(args) != 2:
             print 'Command requires two argument. Unit (weeks, days, hours or minutes) and interval.'
             return
         else:
