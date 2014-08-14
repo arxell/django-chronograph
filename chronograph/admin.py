@@ -76,7 +76,7 @@ class JobAdmin(admin.ModelAdmin):
     fieldsets = (
         (_('Job Details'), {
             'classes': ('wide',),
-            'fields': ('name', 'command', 'shell_command', 'run_in_shell', 'args', 'disabled',)
+            'fields': ('name', 'command', 'shell_command', 'run_in_shell', 'args', 'disabled', 'timeout')
         }),
         (_('E-mail subscriptions'), {
             'classes': ('wide',),

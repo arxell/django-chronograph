@@ -9,8 +9,8 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         # Adding field 'Log.hostname'
-        db.add_column(u'chronograph_log', 'hostname',
-                      self.gf('django.db.models.fields.TextField')(null=True),
+        db.add_column(u'chronograph_job', 'timeout',
+                      self.gf('django.db.models.fields.IntegerField')(null=True),
                       keep_default=False)
 
     def backwards(self, orm):
@@ -69,7 +69,8 @@ class Migration(SchemaMigration):
             'params': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'run_in_shell': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'shell_command': ('django.db.models.fields.CharField', [], {'max_length': '255', 'blank': 'True'}),
-            'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'error_subscribers_set'", 'blank': 'True', 'to': u"orm['auth.User']"})
+            'subscribers': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'error_subscribers_set'", 'blank': 'True', 'to': u"orm['auth.User']"}),
+            'timeout': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
         },
         u'chronograph.log': {
             'Meta': {'ordering': "('-run_date',)", 'object_name': 'Log'},

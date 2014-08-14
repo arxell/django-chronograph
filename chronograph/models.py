@@ -61,6 +61,7 @@ class Job(models.Model):
     last_run_successful = models.BooleanField(default=True, blank=False, null=False, editable=False)
     info_subscribers = models.ManyToManyField(User, related_name='info_subscribers_set', blank=True)
     subscribers = models.ManyToManyField(User, related_name='error_subscribers_set', blank=True, verbose_name=_("error subscribers"))
+    timeout = models.IntegerField(null=True, blank=True)
 
     objects = JobManager()
 
