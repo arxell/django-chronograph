@@ -158,7 +158,7 @@ class Job(models.Model):
 
         A ``Log`` will be created if there is any output from either stdout or stderr.
         """
-        success = None
+        success = False
         run_date = tz_now()
         self.is_running = True
         self.save()
