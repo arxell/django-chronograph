@@ -227,7 +227,7 @@ class Job(models.Model):
             call_command(self.command, *args, **options)
             success = True
         except Exception:
-            exception_str = traceback.print_exc()
+            exception_str = traceback.format_exc()
             success = False
 
         return stdout.getvalue(), stderr.getvalue() + exception_str, success
@@ -253,7 +253,7 @@ class Job(models.Model):
                 stderr_str += "\n\n*** Process ended with return code %d\n\n" % proc.returncode
             success = not proc.returncode
         except Exception:
-            stderr_str = traceback.print_exc()
+            stderr_str = traceback.format_exc()
             success = False
 
         return stdout_str, stderr_str, success
