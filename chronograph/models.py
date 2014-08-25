@@ -1,4 +1,10 @@
 from cStringIO import StringIO
+import os
+import shlex
+import socket
+import subprocess
+import traceback
+
 from dateutil import rrule
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -8,11 +14,6 @@ from django.db.models import Q
 from django.utils.encoding import smart_str, smart_unicode
 from django.utils.timesince import timeuntil
 from django.utils.timezone import now as tz_now
-from django.utils.translation import ungettext, ugettext, ugettext_lazy as _
-import shlex
-import socket
-import subprocess
-import traceback
 
 
 class JobManager(models.Manager):
@@ -21,16 +22,20 @@ class JobManager(models.Manager):
         """
         Returns a ``QuerySet`` of all jobs waiting to be run.
         """
-        return self.filter(Q(next_run__lte=tz_now(), disabled=False, is_running=False) | Q(adhoc_run=True, is_running=False))
+        return self.filter(
+            Q(next_run__lte=tz_now(), disabled=False, is_running=False)
+            | Q(adhoc_run=True, is_running=False)
+        )
+
 
 # A lot of rrule stuff is from django-schedule
-freqs = (("YEARLY", _("Yearly")),
-         ("MONTHLY", _("Monthly")),
-         ("WEEKLY", _("Weekly")),
-         ("DAILY", _("Daily")),
-         ("HOURLY", _("Hourly")),
-         ("MINUTELY", _("Minutely")),
-         ("SECONDLY", _("Secondly")))
+freqs = (("YEARLY", u'Yearly'),
+         ("MONTHLY", u'Monthly'),
+         ("WEEKLY", u'Weekly'),
+         ("DAILY", u'Daily'),
+         ("HOURLY", u'Hourly'),
+         ("MINUTELY", u'Minutely'),
+         ("SECONDLY", u'Secondly'))
 
 
 class Job(models.Model):
@@ -38,29 +43,39 @@ class Job(models.Model):
     """
     A recurring ``django-admin`` command to be run.
     """
-    name = models.CharField(_("name"), max_length=200)
-    frequency = models.CharField(_("frequency"), choices=freqs, max_length=10)
-    params = models.TextField(_("params"), null=True, blank=True,
-                              help_text=_(
-                                  'Semicolon separated list (no spaces) of '
-                                  '<a href="http://labix.org/python-dateutil" target="_blank">rrule '
-                                  'parameters</a>. e.g: interval:15 or byhour:6;byminute:40'
-                              ))
-    command = models.CharField(_("command"), max_length=200,
-                               help_text=_("A valid django-admin command to run."), blank=True)
-    shell_command = models.CharField(_("shell command"), max_length=255,
-                                     help_text=_("A shell command."), blank=True)
-    run_in_shell = models.BooleanField(default=False, help_text=_('This command needs to run within a shell?'))
-    args = models.CharField(_("args"), max_length=200, blank=True,
-                            help_text=_("Space separated list; e.g: arg1 option1=True"))
-    disabled = models.BooleanField(_("disabled"), default=False, help_text=_('If checked this job will never run.'))
-    next_run = models.DateTimeField(_("next run"), blank=True, null=True, help_text=_("If you don't set this it will be determined automatically"))
+    name = models.CharField(u'name', max_length=200)
+    frequency = models.CharField(u'frequency', choices=freqs, max_length=10)
+    params = models.TextField(
+        u'params', null=True, blank=True,
+        help_text=u'''
+Semicolon separated list (no spaces) of
+<a href="http://labix.org/python-dateutil" target="_blank">rrule parameters</a>.
+e.g: interval:15 or byhour:6;byminute:40
+'''
+    )
+    command = models.CharField(
+        u'command', max_length=200,
+        help_text=u'A valid django-admin command to run.', blank=True
+    )
+    shell_command = models.CharField(u'shell command', max_length=255,
+                                     help_text=u'A shell command.', blank=True)
+    run_in_shell = models.BooleanField(default=False, help_text=u'This command needs to run within a shell?')
+    args = models.CharField(u'args', max_length=200, blank=True,
+                            help_text=u'Space separated list; e.g: arg1 option1=True')
+    disabled = models.BooleanField(u'disabled', default=False, help_text=u'If checked this job will never run.')
+    next_run = models.DateTimeField(
+        blank=True, null=True, help_text=u'If you don\'t set this it will be determined automatically'
+    )
     adhoc_run = models.BooleanField(default=False)
-    last_run = models.DateTimeField(_("last run"), editable=False, blank=True, null=True)
-    is_running = models.BooleanField(_("Running?"), default=False, editable=False)
+    last_run = models.DateTimeField(u'last run', editable=False, blank=True, null=True)
+    is_running = models.BooleanField(u'Running?', default=False, editable=False)
+    pid = models.IntegerField(null=True, editable=True)
+    host = models.CharField(max_length=256, null=True, editable=False)
     last_run_successful = models.BooleanField(default=True, blank=False, null=False, editable=False)
     info_subscribers = models.ManyToManyField(User, related_name='info_subscribers_set', blank=True)
-    subscribers = models.ManyToManyField(User, related_name='error_subscribers_set', blank=True, verbose_name=_("error subscribers"))
+    subscribers = models.ManyToManyField(
+        'auth.User', related_name='error_subscribers_set', blank=True, verbose_name=u'error subscribers'
+    )
     timeout = models.IntegerField(null=True, blank=True)
 
     objects = JobManager()
@@ -70,8 +85,8 @@ class Job(models.Model):
 
     def __unicode__(self):
         if self.disabled:
-            return _(u"%(name)s - disabled") % {'name': self.name}
-        return u"%s - %s" % (self.name, self.timeuntil)
+            return u'{} - disabled'.format(self.name)
+        return u"{} - {}".format(self.name, self.timeuntil)
 
     def save(self, *args, **kwargs):
         if not self.disabled:
@@ -90,24 +105,19 @@ class Job(models.Model):
         time this Job will be run.
         """
         if self.adhoc_run:
-            return _('ASAP')
+            return u'ASAP'
         elif self.disabled:
-            return _('never (disabled)')
+            return u'never (disabled)'
 
         delta = self.next_run - tz_now()
         if delta.days < 0:
             # The job is past due and should be run as soon as possible
-            return _('due')
+            return u'due'
         elif delta.seconds < 60:
-            # Adapted from django.utils.timesince
-            count = lambda n: ungettext('second', 'seconds', n)
-            return ugettext('%(number)d %(type)s') % {
-                'number': delta.seconds,
-                'type': count(delta.seconds)
-            }
+            return u'{} sec.'.format(delta.seconds)
 
         return timeuntil(self.next_run)
-    get_timeuntil.short_description = _('time until next run')
+    get_timeuntil.short_description = u'time until next run'
     timeuntil = property(get_timeuntil)
 
     def get_rrule(self):
@@ -161,6 +171,8 @@ class Job(models.Model):
         success = False
         run_date = tz_now()
         self.is_running = True
+        self.pid = os.getpid()
+        self.host = socket.gethostname()
         self.save()
 
         stdout_str, stderr_str = "", ""
@@ -177,6 +189,8 @@ class Job(models.Model):
             # If stderr was written the job is not successful
             self.last_run_successful = success
             self.is_running = False
+            self.pid = None
+            self.host = None
             self.adhoc_run = False
             self.save()
 
@@ -295,7 +309,7 @@ class Log(models.Model):
             info_output = self.stderr
 
         for user in subscriber_set:
-            subscribers.append('"%s" <%s>' % (user.get_full_name(), user.email))
+            subscribers.append('%s" <%s>' % (user.get_full_name(), user.email))
 
         message_body = u'''
 ********************************************************************************
@@ -330,11 +344,11 @@ INFORMATIONAL OUTPUT
 
 
 def _escape_shell_command(command):
-    for n in ('`', '$', '"'):
+    for n in ('`', '$', ''):
         command = command.replace(n, '\%s' % n)
     return command
 
 
 class Hooks(models.Model):
-    command = models.CharField(_("shell command"), max_length=255,
-                               help_text=_("A shell command."), blank=True)
+    command = models.CharField(u'shell command', max_length=255,
+                               help_text=u'A shell command.', blank=True)

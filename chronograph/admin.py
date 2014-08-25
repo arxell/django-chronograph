@@ -65,7 +65,7 @@ class JobAdmin(admin.ModelAdmin):
     form = JobForm
     list_display = (
         'job_success', 'name', 'last_run_with_link', 'next_run_', 'get_timeuntil',
-        'frequency', 'is_running', 'run_button', 'view_logs_button',
+        'frequency', 'is_running', 'pid', 'host', 'run_button', 'view_logs_button',
     )
     list_display_links = ('name',)
     list_filter = ('last_run_successful', 'frequency', 'disabled')
@@ -92,7 +92,7 @@ class JobAdmin(admin.ModelAdmin):
         return queryset.update(disabled=True)
 
     def reset_jobs(self, request, queryset):
-        return queryset.update(is_running=False)
+        return queryset.update(is_running=False, host=None, pid=None)
 
     def last_run_with_link(self, obj):
         if not obj.last_run:
