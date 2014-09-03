@@ -27,8 +27,10 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('name', models.CharField(max_length=200, verbose_name='name')),
-                ('frequency', models.CharField(max_length=10, verbose_name='frequency', choices=[(b'YEARLY', 'Yearly'), (b'MONTHLY', 'Monthly'), (b'WEEKLY', 'Weekly'), (b'DAILY', 'Daily'), (b'HOURLY', 'Hourly'), (b'MINUTELY', 'Minutely'), (b'SECONDLY', 'Secondly')])),
-                ('params', models.TextField(help_text='\nSemicolon separated list (no spaces) of\n<a href="http://labix.org/python-dateutil" target="_blank">rrule parameters</a>.\ne.g: interval:15 or byhour:6;byminute:40\n', null=True, verbose_name='params', blank=True)),
+                ('frequency', models.CharField(max_length=10, verbose_name='frequency', choices=[(b'YEARLY', 'Yearly'), (b'MONTHLY', 'Monthly'), (
+                    b'WEEKLY', 'Weekly'), (b'DAILY', 'Daily'), (b'HOURLY', 'Hourly'), (b'MINUTELY', 'Minutely'), (b'SECONDLY', 'Secondly')])),
+                ('params', models.TextField(help_text='\nSemicolon separated list (no spaces) of\n<a href="http://labix.org/python-dateutil" target="_blank">rrule parameters</a>.\ne.g: interval:15 or byhour:6;byminute:40\n',
+                 null=True, verbose_name='params', blank=True)),
                 ('command', models.CharField(help_text='A valid django-admin command to run.', max_length=200, verbose_name='command', blank=True)),
                 ('shell_command', models.CharField(help_text='A shell command.', max_length=255, verbose_name='shell command', blank=True)),
                 ('run_in_shell', models.BooleanField(default=False, help_text='This command needs to run within a shell?')),
@@ -43,7 +45,8 @@ class Migration(migrations.Migration):
                 ('last_run_successful', models.BooleanField(default=True, editable=False)),
                 ('timeout', models.IntegerField(null=True, blank=True)),
                 ('info_subscribers', models.ManyToManyField(related_name=b'info_subscribers_set', to=settings.AUTH_USER_MODEL, blank=True)),
-                ('subscribers', models.ManyToManyField(related_name=b'error_subscribers_set', verbose_name='error subscribers', to=settings.AUTH_USER_MODEL, blank=True)),
+                ('subscribers', models.ManyToManyField(related_name=b'error_subscribers_set',
+                 verbose_name='error subscribers', to=settings.AUTH_USER_MODEL, blank=True)),
             ],
             options={
                 'ordering': ('disabled', 'next_run'),

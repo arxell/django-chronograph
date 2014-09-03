@@ -28,7 +28,7 @@ try:
 except IOError:
     long_description = None
 
-description='Chronograph, a Django library for managing scheduled tasks (version mantained by Inoa)'
+description = 'Chronograph, a Django library for managing scheduled tasks (version mantained by Inoa)'
 setup(
     name=app_name,
     version='0.1.22',
