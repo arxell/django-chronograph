@@ -39,7 +39,7 @@ setup(
     author_email='django@inoa.com.br',
     packages=packages,
     install_requires=[
-        "Django >= 1.5.0",
+        "Django >= 1.7.0",
     ],
     classifiers=[
         "Development Status :: 4 - Beta",
