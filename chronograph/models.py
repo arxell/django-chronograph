@@ -57,11 +57,9 @@ e.g: interval:15 or byhour:6;byminute:40
         u'command', max_length=200,
         help_text=u'A valid django-admin command to run.', blank=True
     )
-    shell_command = models.CharField(u'shell command', max_length=255,
-                                     help_text=u'A shell command.', blank=True)
+    shell_command = models.TextField(u'shell command', blank=True)
     run_in_shell = models.BooleanField(default=False, help_text=u'This command needs to run within a shell?')
-    args = models.CharField(u'args', max_length=200, blank=True,
-                            help_text=u'Space separated list; e.g: arg1 option1=True')
+    args = models.TextField(u'args', blank=True, help_text=u'Space separated list; e.g: arg1 option1=True')
     disabled = models.BooleanField(u'disabled', default=False, help_text=u'If checked this job will never run.')
     next_run = models.DateTimeField(
         blank=True, null=True, help_text=u'If you don\'t set this it will be determined automatically'
