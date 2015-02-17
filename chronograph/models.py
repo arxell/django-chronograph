@@ -75,6 +75,7 @@ e.g: interval:15 or byhour:6;byminute:40
         'auth.User', related_name='error_subscribers_set', blank=True, verbose_name=u'error subscribers'
     )
     timeout = models.IntegerField(null=True, blank=True)
+    allow_duplicates = models.BooleanField(default=False)
 
     objects = JobManager()
 

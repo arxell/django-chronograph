@@ -12,7 +12,6 @@ from django.utils import dateformat, formats
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django.utils.text import capfirst
-from django.utils.translation import ugettext_lazy as _
 
 
 class HTMLWidget(forms.Widget):
@@ -48,16 +47,14 @@ class JobForm(forms.ModelForm):
     def clean_shell_command(self):
         if self.cleaned_data.get('command', '').strip() and \
                 self.cleaned_data.get('shell_command', '').strip():
-            raise forms.ValidationError(_("Can't specify a shell_command if "
-                                          "a django admin command is already specified"))
+            raise forms.ValidationError("Can't specify a shell_command if a django admin command is already specified")
         return self.cleaned_data['shell_command']
 
     def clean(self):
         cleaned_data = super(JobForm, self).clean()
         if len(cleaned_data.get('command', '').strip()) and \
                 len(cleaned_data.get('shell_command', '').strip()):
-            raise forms.ValidationError(_("Must specify either command or "
-                                        "shell command"))
+            raise forms.ValidationError("Must specify either command or shell command")
         return cleaned_data
 
 
@@ -75,16 +72,13 @@ class JobAdmin(admin.ModelAdmin):
     filter_horizontal = ('subscribers', 'info_subscribers')
 
     fieldsets = (
-        (_('Job Details'), {
-            'classes': ('wide',),
-            'fields': ('name', 'command', 'shell_command', 'run_in_shell', 'args', 'disabled', 'timeout')
+        ('Job Details', {
+            'fields': ('name', 'command', 'shell_command', 'run_in_shell', 'args', 'disabled', 'allow_duplicates', 'timeout')
         }),
-        (_('E-mail subscriptions'), {
-            'classes': ('wide',),
+        ('E-mail subscriptions', {
             'fields': ('info_subscribers', 'subscribers',)
         }),
-        (_('Frequency options'), {
-            'classes': ('wide',),
+        ('Frequency options', {
             'fields': ('frequency', 'next_run', 'params',)
         }),
     )
@@ -112,7 +106,7 @@ class JobAdmin(admin.ModelAdmin):
 
         return '<a href="%s">%s</a>' % (reversed_url, value)
     last_run_with_link.allow_tags = True
-    last_run_with_link.short_description = _('Last run')
+    last_run_with_link.short_description = 'Last run'
     last_run_with_link.admin_order_field = 'last_run'
 
     def next_run_(self, obj):
@@ -123,12 +117,12 @@ class JobAdmin(admin.ModelAdmin):
         else:
             format_ = formats.get_format('DATETIME_FORMAT')
             return capfirst(dateformat.format(obj.next_run, format_))
-    next_run_.short_description = _('Next run')
+    next_run_.short_description = 'Next run'
     next_run_.admin_order_field = 'next_run'
 
     def job_success(self, obj):
         return obj.last_run_successful
-    job_success.short_description = _(u'OK')
+    job_success.short_description = u'OK'
     job_success.boolean = True
 
     def run_button(self, obj):
@@ -136,13 +130,13 @@ class JobAdmin(admin.ModelAdmin):
         on_click = "window.location='%d/run/?inline=1';" % obj.id
         return '<input type="button" onclick="%s" value="Run" %s/>' % (on_click, disabled)
     run_button.allow_tags = True
-    run_button.short_description = _('Run')
+    run_button.short_description = 'Run'
 
     def view_logs_button(self, obj):
         on_click = "window.location='../log/?job=%d';" % obj.id
         return '<input type="button" onclick="%s" value="View Logs" />' % on_click
     view_logs_button.allow_tags = True
-    view_logs_button.short_description = _('Logs')
+    view_logs_button.short_description = 'Logs'
 
     def run_job_view(self, request, pk):
         """
@@ -165,9 +159,10 @@ class JobAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super(JobAdmin, self).get_urls()
-        my_urls = patterns('',
-                           url(r'^(.+)/run/$', self.admin_site.admin_view(self.run_job_view), name="chronograph_job_run"),
-                           )
+        my_urls = patterns(
+            '',
+            url(r'^(.+)/run/$', self.admin_site.admin_view(self.run_job_view), name="chronograph_job_run"),
+        )
         return my_urls + urls
 
 
@@ -180,22 +175,22 @@ class LogAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('job', 'hostname')
         }),
-        (_('Output'), {
+        ('Output', {
             'fields': ('stdout', 'stderr',)
         }),
     )
 
     def job_duration(self, obj):
         return "%s" % (obj.get_duration())
-    job_duration.short_description = _(u'Duration')
+    job_duration.short_description = u'Duration'
 
     def job_name(self, obj):
         return obj.job.name
-    job_name.short_description = _(u'Name')
+    job_name.short_description = u'Name'
 
     def job_success(self, obj):
         return obj.success
-    job_success.short_description = _(u'OK')
+    job_success.short_description = u'OK'
     job_success.boolean = True
 
     def output(self, obj):
@@ -203,14 +198,14 @@ class LogAdmin(admin.ModelAdmin):
         if len(result) > 40:
             result = result[:40] + '...'
 
-        return result or _('(No output)')
+        return result or '(No output)'
 
     def errors(self, obj):
         result = obj.stderr or ''
         if len(result) > 40:
             result = result[:40] + '...'
 
-        return result or _('(No errors)')
+        return result or '(No errors)'
 
     def has_add_permission(self, request):
         return False
