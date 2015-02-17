@@ -168,7 +168,7 @@ class JobAdmin(admin.ModelAdmin):
 
 class LogAdmin(admin.ModelAdmin):
     list_display = ('job_name', 'run_date', 'hostname', 'end_date', 'job_duration', 'job_success', 'output', 'errors',)
-    search_fields = ('stdout', 'stderr', 'job__name', 'job__command',)
+    search_fields = ('stdout', 'stderr', 'job__name', 'job__command')
     date_hierarchy = 'run_date'
     list_filter = ('job__name', 'hostname',)
     fieldsets = (
