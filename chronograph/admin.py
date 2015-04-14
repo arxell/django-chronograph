@@ -5,7 +5,7 @@ from django.contrib import admin, messages
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.forms import Textarea
-from django.forms.util import flatatt
+from django.forms.utils import flatatt
 from django.http import HttpResponseRedirect, Http404
 from django.template.defaultfilters import linebreaks
 from django.utils import dateformat, formats
