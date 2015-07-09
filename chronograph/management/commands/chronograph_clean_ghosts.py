@@ -13,7 +13,7 @@ class Command(BaseCommand):
         running_jobs = Job.objects.filter(is_running=True)
         now = tz_now()
         for job in running_jobs:
-            if job.last_run + dt.timedelta(seconds=job.timeout) > now:
+            if job.last_run + dt.timedelta(seconds=job.timeout or 60*10) > now:
                 print 'setting job with pid {} as not running (no pid found in os)'.format(job.pid)
                 job.is_running = False
                 job.pid = None
