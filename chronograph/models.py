@@ -172,6 +172,8 @@ e.g: interval:15 or byhour:6;byminute:40
         self.is_running = True
         self.pid = os.getpid()
         self.host = socket.gethostname()
+        self.next_run = self.rrule.after(run_date)
+        self.last_run = run_date
         self.save()
 
         stdout_str, stderr_str = "", ""
@@ -191,11 +193,6 @@ e.g: interval:15 or byhour:6;byminute:40
             self.pid = None
             self.host = None
             self.adhoc_run = False
-            self.save()
-
-        if save:
-            self.next_run = self.rrule.after(run_date)
-            self.last_run = run_date
             self.save()
 
         end_date = tz_now()
