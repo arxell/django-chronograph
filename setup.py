@@ -6,7 +6,7 @@ import os
 app_name = 'django-chronograph'
 package_dir = 'chronograph'
 
-for scheme in INSTALL_SCHEMES.values():
+for scheme in list(INSTALL_SCHEMES.values()):
     scheme['data'] = scheme['purelib']
 
 packages = []
