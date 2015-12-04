@@ -11,7 +11,7 @@ from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.db import models
 from django.db.models import Q
-from django.utils.encoding import smart_bytes, smart_text
+from django.utils.encoding import smart_text
 from django.utils.timesince import timeuntil
 from django.utils.timezone import now as tz_now
 
@@ -23,8 +23,8 @@ class JobManager(models.Manager):
         Returns a ``QuerySet`` of all jobs waiting to be run.
         """
         return self.filter(
-            Q(next_run__lte=tz_now(), disabled=False, is_running=False)
-            | Q(adhoc_run=True, is_running=False)
+            Q(next_run__lte=tz_now(), disabled=False, is_running=False) |
+            Q(adhoc_run=True, is_running=False)
         )
 
 
@@ -155,7 +155,7 @@ e.g: interval:15 or byhour:6;byminute:40
         for arg in self.args.split():
             if arg.find('=') > -1:
                 key, value = arg.split('=')
-                options[smart_bytes(key)] = smart_bytes(value)
+                options[smart_text(key)] = smart_text(value)
             else:
                 args.append(arg)
         return (args, options)
